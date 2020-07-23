@@ -8,103 +8,187 @@
 
 import SpriteKit
 import GameplayKit
+import AVFoundation
 
-class GameScene: SKScene {
+class GameScene: SKScene, SKPhysicsContactDelegate {
     
-    var entities = [GKEntity]()
-    var graphs = [String : GKGraph]()
+    var paddleTouched = false
     
-    private var lastUpdateTime : TimeInterval = 0
-    private var label : SKLabelNode?
-    private var spinnyNode : SKShapeNode?
-    
-    override func sceneDidLoad() {
+    let bundle = Bundle.main
 
-        self.lastUpdateTime = 0
+    let ballCategoryName = "ball"
+    let paddleCategoryName = "paddle"
+    let brickCategoryName = "brick"
+    
+    var backgroundMusicPlayer = AVAudioPlayer()
+    
+    let ballCategory: UInt32 = 0x1 << 0
+    let bottomCategory: UInt32 = 0x1 << 1
+    let brickCategory: UInt32 = 0x1 << 2
+    let paddleCategory: UInt32 = 0x1 << 3
+    
+    override init(size: CGSize) {
+        super.init(size: size)
         
-        // Get label node from scene and store it for use later
-        self.label = self.childNode(withName: "//helloLabel") as? SKLabelNode
-        if let label = self.label {
-            label.alpha = 0.0
-            label.run(SKAction.fadeIn(withDuration: 2.0))
-        }
+        self.physicsWorld.contactDelegate = self
         
-        // Create shape node to use during mouse interaction
-        let w = (self.size.width + self.size.height) * 0.05
-        self.spinnyNode = SKShapeNode.init(rectOf: CGSize.init(width: w, height: w), cornerRadius: w * 0.3)
+        self.addBackgroundMusic()
+        self.addBackgroundImage()
         
-        if let spinnyNode = self.spinnyNode {
-            spinnyNode.lineWidth = 2.5
-            
-            spinnyNode.run(SKAction.repeatForever(SKAction.rotate(byAngle: CGFloat(Double.pi), duration: 1)))
-            spinnyNode.run(SKAction.sequence([SKAction.wait(forDuration: 0.5),
-                                              SKAction.fadeOut(withDuration: 0.5),
-                                              SKAction.removeFromParent()]))
-        }
+        self.setPhyscisGravity()
+        self.createWorldBorder()
+        self.createWorldBorder()
+        self.setWorldFriction()
+        
+        self.createBallWithPhysics()
+        self.createPaddle()
+        self.createBricks()
+        
+        self.createBottomRect()
+        
+    }
+    
+    required init?(coder aDecoder: NSCoder) {
+        super.init(coder: aDecoder)
+    }
+    
+    func addBackgroundMusic() {
+        
+        let backgroundMusicPathString = bundle.path(forResource: "DX_ball_Background", ofType: "mp3")
+        
+        let backgroundMusicspathURL = URL(fileURLWithPath: backgroundMusicPathString!)
+        print(backgroundMusicspathURL as Any)
+        
+        backgroundMusicPlayer = try! AVAudioPlayer(contentsOf: backgroundMusicspathURL)
+        backgroundMusicPlayer.numberOfLoops = -1            //Forever Loop
+        backgroundMusicPlayer.prepareToPlay()
+        backgroundMusicPlayer.play()
     }
     
     
-    func touchDown(atPoint pos : CGPoint) {
-        if let n = self.spinnyNode?.copy() as! SKShapeNode? {
-            n.position = pos
-            n.strokeColor = SKColor.green
-            self.addChild(n)
-        }
+    func addBackgroundImage() {
+        
+        let backgroundImage = SKSpriteNode(imageNamed: "17345")
+        backgroundImage.position = CGPoint(x: self.frame.size.width / 2, y: self.frame.size.height / 2)
+        
+        self.addChild(backgroundImage)
     }
     
-    func touchMoved(toPoint pos : CGPoint) {
-        if let n = self.spinnyNode?.copy() as! SKShapeNode? {
-            n.position = pos
-            n.strokeColor = SKColor.blue
-            self.addChild(n)
-        }
+    func setPhyscisGravity () {
+        
+        self.physicsWorld.gravity = CGVector(dx: 0, dy: 0)      //Set Gravity = 0
     }
     
-    func touchUp(atPoint pos : CGPoint) {
-        if let n = self.spinnyNode?.copy() as! SKShapeNode? {
-            n.position = pos
-            n.strokeColor = SKColor.red
-            self.addChild(n)
-        }
+    func createWorldBorder () {
+        
+        let worldBorder = SKPhysicsBody(edgeLoopFrom: self.frame)
+        self.physicsBody = worldBorder
+    }
+    
+    func setWorldFriction() {
+        self.physicsBody?.friction = 0
+    }
+    
+    func createBallWithPhysics () {
+        let ball = SKSpriteNode(imageNamed: "ball")
+        ball.name = ballCategoryName
+        ball.position = CGPoint(x: self.frame.size.width / 4, y: self.frame.size.height / 4)
+        ball.size = CGSize(width: 20, height: 20)
+        self.addChild(ball)
+        
+        ball.physicsBody = SKPhysicsBody(circleOfRadius: ball.frame.size.width / 2)
+        ball.physicsBody?.friction = 0
+        ball.physicsBody?.restitution = 1
+        ball.physicsBody?.linearDamping = 0
+        ball.physicsBody?.allowsRotation = false
+        
+        ball.physicsBody?.applyImpulse(CGVector(dx: 5, dy: -5))
+        
+        ball.physicsBody?.categoryBitMask = ballCategory
+        ball.physicsBody?.contactTestBitMask = bottomCategory
+    }
+    
+    func createPaddle(){
+        
+        let paddle = SKSpriteNode(imageNamed: "paddle")
+        paddle.name = paddleCategoryName
+
+        let middleX = self.frame.midX
+        paddle.position = CGPoint(x: middleX, y: paddle.frame.size.height/6)
+        paddle.size = CGSize(width: 100, height: 20)
+        
+        self.addChild(paddle)
+        
+        paddle.physicsBody = SKPhysicsBody(rectangleOf: paddle.frame.size)
+        paddle.physicsBody?.friction = 0.4
+        paddle.physicsBody?.restitution = 0.1
+        paddle.physicsBody?.isDynamic = false
+        
+        paddle.physicsBody?.categoryBitMask = paddleCategory
+    }
+    
+    func createBricks() {
+        let numberOfRows = 6
+        let numberOfBricks = 5
+    }
+    
+    func createBottomRect() {
+        let bottomRect = CGRect(x: self.frame.origin.x, y: self.frame.origin.y, width: self.frame.size.width, height: 1)
+        let bottom = SKNode()
+        bottom.physicsBody = SKPhysicsBody(edgeLoopFrom: bottomRect)
+        
+        self.addChild(bottom)
+        bottom.physicsBody?.categoryBitMask = bottomCategory
     }
     
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
-        if let label = self.label {
-            label.run(SKAction.init(named: "Pulse")!, withKey: "fadeInOut")
-        }
+        let touch = touches.first
+        let touchLocation = touch!.location(in: self)
         
-        for t in touches { self.touchDown(atPoint: t.location(in: self)) }
+        let body: SKPhysicsBody? = self.physicsWorld.body(at: touchLocation)
+        
+        if body?.node?.name == paddleCategoryName {
+            print("Paddle Touched")
+            paddleTouched = true
+        }
     }
     
     override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
-        for t in touches { self.touchMoved(toPoint: t.location(in: self)) }
+        if paddleTouched {
+            let touch = touches.first
+            let touchLoc = touch?.location(in: self)
+            let previousTouchLoc = touch?.previousLocation(in: self)
+            
+            let paddle = self.childNode(withName: paddleCategoryName) as! SKSpriteNode
+            
+            var newXPosition = paddle.position.x + (touchLoc!.x - previousTouchLoc!.x)
+            
+            newXPosition = max(newXPosition, paddle.size.width/2)
+            newXPosition = min(newXPosition, self.size.width - paddle.size.width/2)
+            
+            paddle.position = CGPoint(x: newXPosition, y: paddle.position.y)
+        }
     }
     
     override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
-        for t in touches { self.touchUp(atPoint: t.location(in: self)) }
+        paddleTouched = false
     }
     
-    override func touchesCancelled(_ touches: Set<UITouch>, with event: UIEvent?) {
-        for t in touches { self.touchUp(atPoint: t.location(in: self)) }
-    }
-    
-    
-    override func update(_ currentTime: TimeInterval) {
-        // Called before each frame is rendered
+    func didBegin(_ contact: SKPhysicsContact) {
         
-        // Initialize _lastUpdateTime if it has not already been
-        if (self.lastUpdateTime == 0) {
-            self.lastUpdateTime = currentTime
+        var firstBody = SKPhysicsBody()
+        var secondBody = SKPhysicsBody()
+        
+        if contact.bodyA.categoryBitMask < contact.bodyB.categoryBitMask {
+            firstBody = contact.bodyA
+            secondBody = contact.bodyB
+        }else {
+            firstBody = contact.bodyB
+            secondBody = contact.bodyA
         }
         
-        // Calculate time since last update
-        let dt = currentTime - self.lastUpdateTime
-        
-        // Update entities
-        for entity in self.entities {
-            entity.update(deltaTime: dt)
+        if firstBody.categoryBitMask == ballCategory && secondBody.categoryBitMask == bottomCategory {
+            print("You Loose!")
         }
-        
-        self.lastUpdateTime = currentTime
     }
 }

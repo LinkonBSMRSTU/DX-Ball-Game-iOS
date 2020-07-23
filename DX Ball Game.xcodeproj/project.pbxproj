@@ -17,6 +17,7 @@
 		4FC48D8624C6F1A3004ABAF9 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 4FC48D8424C6F1A3004ABAF9 /* LaunchScreen.storyboard */; };
 		4FC48D9124C6F1A3004ABAF9 /* DX_Ball_GameTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4FC48D9024C6F1A3004ABAF9 /* DX_Ball_GameTests.swift */; };
 		4FC48D9C24C6F1A3004ABAF9 /* DX_Ball_GameUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4FC48D9B24C6F1A3004ABAF9 /* DX_Ball_GameUITests.swift */; };
+		4FC48DAA24C6F1FD004ABAF9 /* DX_ball_Background.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 4FC48DA924C6F1FD004ABAF9 /* DX_ball_Background.mp3 */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -53,6 +54,7 @@
 		4FC48D9724C6F1A3004ABAF9 /* DX Ball GameUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "DX Ball GameUITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		4FC48D9B24C6F1A3004ABAF9 /* DX_Ball_GameUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DX_Ball_GameUITests.swift; sourceTree = "<group>"; };
 		4FC48D9D24C6F1A3004ABAF9 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		4FC48DA924C6F1FD004ABAF9 /* DX_ball_Background.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = DX_ball_Background.mp3; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -112,6 +114,7 @@
 				4FC48D8224C6F1A3004ABAF9 /* Assets.xcassets */,
 				4FC48D8424C6F1A3004ABAF9 /* LaunchScreen.storyboard */,
 				4FC48D8724C6F1A3004ABAF9 /* Info.plist */,
+				4FC48DA924C6F1FD004ABAF9 /* DX_ball_Background.mp3 */,
 			);
 			path = "DX Ball Game";
 			sourceTree = "<group>";
@@ -241,6 +244,7 @@
 				4FC48D8124C6F1A2004ABAF9 /* Main.storyboard in Resources */,
 				4FC48D7824C6F1A2004ABAF9 /* GameScene.sks in Resources */,
 				4FC48D8324C6F1A3004ABAF9 /* Assets.xcassets in Resources */,
+				4FC48DAA24C6F1FD004ABAF9 /* DX_ball_Background.mp3 in Resources */,
 				4FC48D8624C6F1A3004ABAF9 /* LaunchScreen.storyboard in Resources */,
 				4FC48D7A24C6F1A2004ABAF9 /* Actions.sks in Resources */,
 			);
